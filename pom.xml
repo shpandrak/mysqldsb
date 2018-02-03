@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <mysql.executables.version>1.0.2</mysql.executables.version>
+	    <mysql.executables.location>${project.build.directory}/mysql</mysql.executables.location>
+    </properties>
+
+    <groupId>com.emc.nazgul.mongodsb</groupId>
+    <version>0.1-SNAPSHOT</version>
+    <artifactId>k8s-mysql-dsb</artifactId>
+    <packaging>pom</packaging>
+    <name>Mysql DSB for Kubernetes</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-mysql-executables</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>utilities</groupId>
+                                    <artifactId>ocopea-util-mysql</artifactId>
+                                    <version>${mysql.executables.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${mysql.executables.location}</outputDirectory>
+                                    <includes>mysql,mysqldump</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <useBuildFilters>true</useBuildFilters>
+                    <outputDirectory>${project.build.directory}/docker</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>fix-shell-permissions--rename-mongo-executables</id>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <target>
+                                <chmod file="target/mysql/mysql*" perm="+x" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <repositories>
+        <repository>
+            <id>ocopea-dependencies</id>
+            <name>dependencies</name>
+            <url>https://raw.githubusercontent.com/ocopea/artifactory/repository/</url>
+        </repository>
+    </repositories>
+
+
+
+</project>
+
